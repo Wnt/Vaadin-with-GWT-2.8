@@ -104,6 +104,28 @@
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-client-compiler</artifactId>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.vaadin.external.gwt</groupId>
+					<artifactId>gwt-dev</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.vaadin.external.gwt</groupId>
+					<artifactId>gwt-elemental</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-dev</artifactId>
+			<version>2.8.0-rc2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-elemental</artifactId>
+			<version>2.8.0-rc2</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>
@@ -131,6 +153,10 @@
 				<groupId>com.vaadin</groupId>
 				<artifactId>vaadin-maven-plugin</artifactId>
 				<version>${vaadin.plugin.version}</version>
+				<configuration>
+					<!-- Generate the widget set to src/main/java instead of the default target/generated-resources/gwt so the GWT compiler can find without any extra configuration -->
+					<generatedWidgetsetDirectory>${basedir}/src/main/java</generatedWidgetsetDirectory>
+				</configuration>
 				<executions>
 					<!-- You are free to mark this as permanently ignored in Eclipse -->
 					<execution>
@@ -139,7 +165,24 @@
 						</configuration>
 						<goals>
 							<goal>resources</goal>
+							<!-- compile goal removed as we use gwt-maven-plugin for compilation -->
+							<!-- <goal>compile</goal> -->
 							<goal>update-widgetset</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<version>2.8.0-rc2</version>
+				<configuration>
+					<webappDirectory>${basedir}/target/classes/VAADIN/widgetsets</webappDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
 							<goal>compile</goal>
 						</goals>
 					</execution>
