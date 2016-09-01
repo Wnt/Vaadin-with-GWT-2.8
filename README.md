@@ -129,7 +129,9 @@ Next we can remove or comment out the compile goal from `vaadin-maven-plugin` as
     <goal>resources</goal>
     <!-- <goal>compile</goal> -->
     <goal>update-widgetset</goal>
-    Last modification we need to do to the pom.xml is to add the gwt-maven-plugin build plugin:
+
+Last modification we need to do to the pom.xml is to add the gwt-maven-plugin build plugin:
+
     <plugin>
        <groupId>org.codehaus.mojo</groupId>
        <artifactId>gwt-maven-plugin</artifactId>
