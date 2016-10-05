@@ -55,99 +55,99 @@ If we take a look at the addon sub-module’s dependency tree using `mvn depende
     ------------------------------------------------------------------------
 
 These are practically the same as official GWT modules, but built by us to a different groupId. We need to exclude these dependencies and introduce equivalent GWT 2.8 dependencies. This can be done by adding an exclude rule to the `pom.xml` in the `com.vaadin:vaadin-client` section:
-
-    <dependency>
-        <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-client</artifactId>
-        <version>${vaadin.version}</version>
-        <scope>provided</scope>
-        <exclusions>
-                 <exclusion>
-                       <groupId>com.vaadin.external.gwt</groupId>
-                       <artifactId>gwt-elemental</artifactId>
-                 </exclusion>
-        </exclusions>
-    </dependency>
-
+```xml
+<dependency>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-client</artifactId>
+    <version>${vaadin.version}</version>
+    <scope>provided</scope>
+    <exclusions>
+             <exclusion>
+                   <groupId>com.vaadin.external.gwt</groupId>
+                   <artifactId>gwt-elemental</artifactId>
+             </exclusion>
+    </exclusions>
+</dependency>
+```
 And let’s introduce an equivalent GWT 2.8 dependency:
-
-    <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt-elemental</artifactId>
-        <version>2.8.0-rc2</version>
-        <scope>provided</scope>
-    </dependency>
-
+```xml
+<dependency>
+    <groupId>com.google.gwt</groupId>
+    <artifactId>gwt-elemental</artifactId>
+    <version>2.8.0-rc2</version>
+    <scope>provided</scope>
+</dependency>
+```
 Now we can build & install the project (run `mvn clean install` in the addon module) and move on to the demo project where the actual widget set compilation happens. Again we can run `mvn dependency:tree` to identify dependencies we need to change. Add the following exclude rules to the pom:
-
-    <dependency>
-        <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-client-compiler</artifactId>
-        <scope>provided</scope>
-        <exclusions>
+```xml
+<dependency>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-client-compiler</artifactId>
+    <scope>provided</scope>
+    <exclusions>
+          <exclusion>
+                  <groupId>com.vaadin.external.gwt</groupId>
+                  <artifactId>gwt-dev</artifactId>
+              </exclusion>
               <exclusion>
-                      <groupId>com.vaadin.external.gwt</groupId>
-                      <artifactId>gwt-dev</artifactId>
-                  </exclusion>
-                  <exclusion>
-                      <groupId>com.vaadin.external.gwt</groupId>
-                      <artifactId>gwt-elemental</artifactId>
-                  </exclusion>
-        </exclusions>
-    </dependency>
-
+                  <groupId>com.vaadin.external.gwt</groupId>
+                  <artifactId>gwt-elemental</artifactId>
+              </exclusion>
+    </exclusions>
+</dependency>
+```
 And add equivalent GWT 2.8 dependencies:
-
-    <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt-dev</artifactId>
-        <version>2.8.0-rc2</version>
-        <scope>provided</scope>
-    </dependency>
-    <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt-elemental</artifactId>
-        <version>2.8.0-rc2</version>
-        <scope>provided</scope>
-    </dependency>
-
+```xml
+<dependency>
+    <groupId>com.google.gwt</groupId>
+    <artifactId>gwt-dev</artifactId>
+    <version>2.8.0-rc2</version>
+    <scope>provided</scope>
+</dependency>
+<dependency>
+    <groupId>com.google.gwt</groupId>
+    <artifactId>gwt-elemental</artifactId>
+    <version>2.8.0-rc2</version>
+    <scope>provided</scope>
+</dependency>
+```
 ## Change to use the GWT 2.8 compiler
 
 Normally Vaadin Maven projects use the `vaadin-maven-plugin` to compile the widgetset. We want to use the upstream `gwt-maven-plugin` instead. Let’s first configure the `vaadin-maven-plugin` to generate the widget set in a directory where the `gwt-maven-plugin` can find it. Add the following configuration section to `vaadin-maven-plugin`:
-
-    <groupId>com.vaadin</groupId>
-    <artifactId>vaadin-maven-plugin</artifactId>
-    <version>${vaadin.plugin.version}</version>
-    <configuration>
-       <generatedWidgetsetDirectory>${basedir}/src/main/java</generatedWidgetsetDirectory>
-    </configuration>
-
+```xml
+<groupId>com.vaadin</groupId>
+<artifactId>vaadin-maven-plugin</artifactId>
+<version>${vaadin.plugin.version}</version>
+<configuration>
+   <generatedWidgetsetDirectory>${basedir}/src/main/java</generatedWidgetsetDirectory>
+</configuration>
+```
 Before generating the widget set, make sure that there is no existing `*.gwt.xml` files in the demo project, as the Vaadin plugin will only create a new widget set into `src/main/java` if there is no existing widget set it can update. To generate the widget set just run `mvn vaadin:update-widgetset`.
 
 Next we can remove or comment out the compile goal from `vaadin-maven-plugin` as we’ll use the upstream GWT compiler for that:
-
-    <goal>resources</goal>
-    <!-- <goal>compile</goal> -->
-    <goal>update-widgetset</goal>
-
+```xml
+<goal>resources</goal>
+<!-- <goal>compile</goal> -->
+<goal>update-widgetset</goal>
+```
 Last modification we need to do to the pom.xml is to add the gwt-maven-plugin build plugin:
-
-    <plugin>
-       <groupId>org.codehaus.mojo</groupId>
-       <artifactId>gwt-maven-plugin</artifactId>
-       <version>2.8.0-rc2</version>
-       <configuration>
-           <webappDirectory>${basedir}/target/classes/VAADIN/widgetsets</webappDirectory>
-       </configuration>
-       <executions>
-           <execution>
-               <goals>
-                   <goal>compile</goal>
-               </goals>
-           </execution>
-       </executions>
-    </plugin>
-
+```xml
+<plugin>
+   <groupId>org.codehaus.mojo</groupId>
+   <artifactId>gwt-maven-plugin</artifactId>
+   <version>2.8.0-rc2</version>
+   <configuration>
+       <webappDirectory>${basedir}/target/classes/VAADIN/widgetsets</webappDirectory>
+   </configuration>
+   <executions>
+       <execution>
+           <goals>
+               <goal>compile</goal>
+           </goals>
+       </execution>
+   </executions>
+</plugin>
+```
 ## Test GWT compilation and run Jetty
 
 Now you are ready to run `mvn clean gwt:compile` to compile the widget set. After the widget set is compiled you can run the demo UI using `mvn jetty:run` and access the test UI at [http://localhost:8080/](http://localhost:8080/).
@@ -155,26 +155,26 @@ Now you are ready to run `mvn clean gwt:compile` to compile the widget set. Afte
 ## Use new GWT 2.8 features and recompile the widget set
 
 Now for the fun part! We can start to utilize new GWT 2.8 features e.g. by simply changing the `ClickHandler` in `MyComponentConnector` from
-
-    getWidget().addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-           final MouseEventDetails mouseDetails = MouseEventDetailsBuilder
-                   .buildMouseEventDetails(event.getNativeEvent(),
-                           getWidget().getElement());
-           // When the widget is clicked, the event is sent to server with ServerRpc
-           rpc.clicked(mouseDetails);
-        }
-    });
-
-into a lambda expression:
-
-    getWidget().addClickHandler(event -> {
-        final MouseEventDetails mouseDetails = MouseEventDetailsBuilder
+```java
+getWidget().addClickHandler(new ClickHandler() {
+    public void onClick(ClickEvent event) {
+       final MouseEventDetails mouseDetails = MouseEventDetailsBuilder
                .buildMouseEventDetails(event.getNativeEvent(),
                        getWidget().getElement());
-        rpc.clicked(mouseDetails);
-    });
-
+       // When the widget is clicked, the event is sent to server with ServerRpc
+       rpc.clicked(mouseDetails);
+    }
+});
+```
+into a lambda expression:
+```java
+getWidget().addClickHandler(event -> {
+    final MouseEventDetails mouseDetails = MouseEventDetailsBuilder
+           .buildMouseEventDetails(event.getNativeEvent(),
+                   getWidget().getElement());
+    rpc.clicked(mouseDetails);
+});
+```
 After making changes to the addon project, you follow the normal workflow of `mvn clean install` in the addon project followed by a `mvn clean gwt:compile` in the demo project.
 
 I hope this tutorial helped you to get started with GWT 2.8 development. The next major Vaadin version, Vaadin 8, will use [GWT 2.8 by default](https://github.com/vaadin/vaadin/blob/master/pom.xml#L28). This means that any Java 8 and JsInterop code you write today should be reusable in Vaadin 8 without the tricks listed in this tutorial.
